@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=expense_tracker
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+
+  app:
+    build: .
+#    command: gunicorn expenses_backend.wsgi:application --bind 0.0.0.0:8000
+    command:
+      - /bin/bash
+      - '-c'
+      - sleep 666d
+#      - python manage.py runserver 0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-#^wg97lj26b_vg_xj0btv1)vt^scb8)&^kx%m4v+lc$fck1p3p
+      - DB_NAME=expense_tracker
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_HOST=db
+      - DB_PORT=5432
+
+volumes:
+  postgres_data:
