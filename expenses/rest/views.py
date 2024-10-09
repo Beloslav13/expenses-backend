@@ -5,9 +5,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 
+from expenses.models import User, Category, Spending
 from expenses.rest.filters import CategoryFilter, SpendingFilter
 from expenses.rest.serializers import UserListSerializer, UserDetailSerializer, CategorySerializer, SpendingSerializer
-from expenses.models import User, Category, Spending
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -24,8 +24,21 @@ class UserViewSet(viewsets.ModelViewSet):
         queryset = queryset.annotate(
             category_count=Count('categories'),
             total_spending=Sum('spendings__cost')
-        ).select_related('categories', 'spendings')
+        )
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            self._add_extra_fields(serializer.data, queryset)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        self._add_extra_fields(serializer.data, queryset)
+        return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -34,6 +47,12 @@ class UserViewSet(viewsets.ModelViewSet):
         data['category_count'] = instance.category_count
         data['total_spending'] = instance.total_spending
         return Response(data)
+
+    @staticmethod
+    def _add_extra_fields(data, queryset):
+        for item in data:
+            item['category_count'] = queryset.get(id=item['id']).category_count
+            item['total_spending'] = queryset.get(id=item['id']).total_spending
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
