@@ -61,7 +61,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def _add_extra_fields(data, queryset):
         for item in data:
             item['category_count'] = queryset.get(id=item['id']).category_count
-            item['total_spending'] = queryset.get(id=item['id']).total_spending
+            item['total_spending'] = queryset.get(id=item['id']).total_spending or 0
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
