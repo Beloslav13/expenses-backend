@@ -1,18 +1,27 @@
+from django.conf import settings
 from django.db.models import Count, Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
 from expenses.models import User, Category, Spending
 from expenses.rest.filters import CategoryFilter, SpendingFilter
 from expenses.rest.serializers import UserListSerializer, UserDetailSerializer, CategorySerializer, SpendingSerializer
 
 
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = settings.REST_FRAMEWORK['PAGE_SIZE']
+    page_size_query_param = 'limit'
+    max_page_size = 100
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserListSerializer
+    pagination_class = CustomPageNumberPagination
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
