@@ -29,15 +29,20 @@ class SpendingSerializer(serializers.ModelSerializer):
 
 class UserListSerializer(serializers.ModelSerializer):
     detail_url = serializers.HyperlinkedIdentityField(view_name='user-detail')
+    category_count = serializers.IntegerField(read_only=True)
+    total_spending = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'external_id', 'is_bot',
-                  'is_premium', 'detail_url']
+                  'is_premium', 'category_count', 'total_spending', 'detail_url']
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
+    category_count = serializers.IntegerField(read_only=True)
+    total_spending = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'external_id', 'is_bot',
-                  'is_premium']
+                  'is_premium', 'category_count', 'total_spending']

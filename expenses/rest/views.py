@@ -19,7 +19,7 @@ class CustomPageNumberPagination(PageNumberPagination):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.filter(is_active=True)
     serializer_class = UserListSerializer
     pagination_class = CustomPageNumberPagination
 
@@ -31,8 +31,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.annotate(
-            category_count=Count('categories'),
-            total_spending=Sum('spendings__cost')
+            category_count=Count('categories', distinct=True),
+            total_spending=Sum('spendings__cost', distinct=True)
         )
         return queryset
 
@@ -54,7 +54,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         data = serializer.data
         data['category_count'] = instance.category_count
-        data['total_spending'] = instance.total_spending
+        data['total_spending'] = instance.total_spending or 0
         return Response(data)
 
     @staticmethod
